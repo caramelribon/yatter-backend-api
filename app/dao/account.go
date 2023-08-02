@@ -23,6 +23,15 @@ func NewAccount(db *sqlx.DB) repository.Account {
 	return &account{db: db}
 }
 
+// CreateAccount : アカウントを作成
+func (r *account) CreateUser(ctx context.Context, account *object.Account) error {
+    _, err := r.db.ExecContext(ctx, "INSERT INTO account (username, password_hash) VALUES (?, ?)", account.Username, account.PasswordHash)
+    if err != nil {
+        return fmt.Errorf("failed to insert account into db: %w", err)
+    }
+    return nil
+}
+
 // FindByUsername : ユーザ名からユーザを取得
 func (r *account) FindByUsername(ctx context.Context, username string) (*object.Account, error) {
 	entity := new(object.Account)
