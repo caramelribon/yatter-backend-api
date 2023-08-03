@@ -37,3 +37,14 @@ func (r *status) CreateStatus(ctx context.Context, status *object.Status) error 
 
 	return nil
 }
+
+// Find a status by ID
+// FindById : IDからステータスを取得
+func (r *status) FindById(ctx context.Context, id int64) (*object.Status, error) {
+	status := &object.Status{}
+	if err := r.db.GetContext(ctx, status, "SELECT * FROM status WHERE id = ?", id); err != nil {
+		return nil, fmt.Errorf("failed to get status from db: %w", err)
+	}
+
+	return status, nil
+}
