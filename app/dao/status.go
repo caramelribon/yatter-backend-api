@@ -44,7 +44,12 @@ func (r *status) CreateStatus(ctx context.Context, status *object.Status, accoun
 // FindById : IDからステータスを取得
 func (r *status) FindById(ctx context.Context, id int64) (*object.Status, error) {
 	entity := new(object.Status)
-	err := r.db.QueryRowxContext(ctx, "SELECT * FROM status WHERE id = ?", id).StructScan(entity)
+	query := `
+		SELECT s.id, s.content, s.create_at, a.id AS "account.id", a.username AS "account.username", a.create_at AS "account.create_at"
+		FROM status s
+		JOIN account a ON s.account_id = a.id
+		WHERE s.id = ?`
+	err := r.db.QueryRowxContext(ctx, query, id).StructScan(entity)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

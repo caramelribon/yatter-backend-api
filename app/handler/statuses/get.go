@@ -35,14 +35,6 @@ func (h *handler) GetStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// status.account_idからaccountを取得
-	account, err := h.ar.FindById(ctx, status.AccountID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	status.Account = account
-
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(status); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
