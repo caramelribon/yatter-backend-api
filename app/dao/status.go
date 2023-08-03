@@ -8,6 +8,7 @@ import (
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -59,4 +60,10 @@ func (r *status) FindById(ctx context.Context, id int64) (*object.Status, error)
 	}
 
 	return entity, nil
+}
+
+// Get statuses
+// GetStatuses : ステータスを取得
+func (r *status) GetStatuses(ctx context.Context, query *object.QueryParams) ([]*object.Status, error){
+
 }
