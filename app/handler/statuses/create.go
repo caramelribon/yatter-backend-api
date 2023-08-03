@@ -3,8 +3,7 @@ package statuses
 import (
 	"encoding/json"
 	"net/http"
-	"time"
-
+	
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/handler/auth"
 )
@@ -12,13 +11,6 @@ import (
 // Request body for `POST /v1/accounts`
 type AddRequest struct {
 	Status string
-}
-
-type AddResponse struct {
-	ID       int64           `json:"id"`
-	Account  *object.Account `json:"account"`
-	Content  string          `json:"content"`
-	CreateAt time.Time       `json:"create_at"`
 }
 
 // Handle request for `POST /v1/statuses`
@@ -37,6 +29,7 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	// アカウント情報の取得
 	account := auth.AccountOf(r)
 	status.AccountID = account.ID
+	status.Account = account
 
 	// ステータスの作成
 	if err := h.sr.CreateStatus(r.Context(), status); err != nil {
@@ -44,16 +37,8 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// レスポンスの作成
-	res := &AddResponse{
-		ID:       status.ID,
-		Account:  account,	
-		Content:  status.Content,
-		CreateAt: status.CreateAt,
-	}
-
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(res); err != nil {
+	if err := json.NewEncoder(w).Encode(status); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
