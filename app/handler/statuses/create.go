@@ -28,11 +28,10 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// アカウント情報の取得
 	account := auth.AccountOf(r)
-	status.AccountID = account.ID
 	status.Account = account
 
 	// ステータスの作成
-	if err := h.sr.CreateStatus(r.Context(), status); err != nil {
+	if err := h.sr.CreateStatus(r.Context(), status, account.ID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

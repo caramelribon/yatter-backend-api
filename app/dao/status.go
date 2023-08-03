@@ -25,8 +25,8 @@ func NewStatus(db *sqlx.DB) repository.Status {
 
 // Create a new status
 // CreateStatus : ステータスを作成
-func (r *status) CreateStatus(ctx context.Context, status *object.Status) error {
-	result, err := r.db.ExecContext(ctx, "INSERT INTO status (account_id, content) VALUES (?, ?)", status.AccountID, status.Content)
+func (r *status) CreateStatus(ctx context.Context, status *object.Status, accountId int64) error {
+	result, err := r.db.ExecContext(ctx, "INSERT INTO status (account_id, content) VALUES (?, ?)", accountId, status.Content)
 	if err != nil {
 		return fmt.Errorf("failed to insert status into db: %w", err)
 	}
