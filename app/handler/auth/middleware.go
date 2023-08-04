@@ -20,18 +20,18 @@ func Middleware(ar repository.Account) func(http.Handler) http.Handler {
 			// ヘッダーから Username を取り出すだけの超安易な認証
 			a := r.Header.Get("Authentication")
 			pair := strings.SplitN(a, " ", 2)
-			if len(pair) < 2 {
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
-			}
+			// if len(pair) < 2 {
+			// 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			// 	return
+			// }
 
-			authType := pair[0]
-			if !strings.EqualFold(authType, "username") {
-				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
-				return
-			}
+			// authType := pair[0]
+			// if !strings.EqualFold(authType, "username") {
+			// 	http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			// 	return
+			// }
 
-			username := pair[1]
+			username := pair[0]
 			if account, err := ar.FindByUsername(ctx, username); err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
