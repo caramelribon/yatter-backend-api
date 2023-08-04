@@ -8,7 +8,6 @@ import (
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
-
 	"github.com/jmoiron/sqlx"
 )
 
@@ -64,6 +63,49 @@ func (r *status) FindById(ctx context.Context, id int64) (*object.Status, error)
 
 // Get statuses
 // GetStatuses : ステータスを取得
-func (r *status) GetStatuses(ctx context.Context, query *object.QueryParams) ([]*object.Status, error){
+func (r *status) GetStatuses(ctx context.Context, query *object.QueryParams) (*[]object.Status, error) {
+	var statuses *[]object.Status
+	var args []interface{}
 
+	// クエリの生成
+	q := `
+		SELECT
+		  s.id,
+			s.content,
+			s.create_at,
+			a.id AS "account.id",
+			a.username AS "account.username",
+			a.create_at AS "account.create_at"
+		FROM status s
+		LEFT JOIN account a ON s.account_id = a.id
+		`
+	if query.OnlyMedia {
+		// 空のスライスを返す
+		return statuses, nil
+	} else {
+		if query.SinceId != 0 && query.MaxId != 0 {
+    q += " WHERE s.id > ? AND s.id < ?"
+    args = append(args, query.MaxId, query.SinceId)
+} else {
+    if query.SinceId != 0 {
+        q += " WHERE s.id > ?"
+        args = append(args, query.SinceId)
+    }
+    if query.MaxId != 0 {
+        q += " WHERE s.id < ?"
+        args = append(args, query.MaxId)
+    }
+}
+	}
+
+	// クエリの実行
+	err := r.db.SelectContext(ctx, &statuses, q, args...)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to find statuses from db: %w", err)
+	}
+
+	return statuses, nil
 }
