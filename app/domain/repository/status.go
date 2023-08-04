@@ -14,4 +14,7 @@ type Status interface {
 
 	// Get statuses
 	GetStatuses(ctx context.Context, query *object.QueryParams) ([]*object.Status, error)
+
+	// Delete a status
+	DeleteStatus(ctx context.Context, statusId int64) error
 }

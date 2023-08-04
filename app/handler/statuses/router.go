@@ -22,6 +22,7 @@ func NewRouter(ar repository.Account, sr repository.Status) http.Handler {
 	h := &handler{ar, sr}
 	r.With(auth.Middleware(ar)).Post("/", h.Create)
 	r.Get("/{id}", h.GetStatus)
+	r.With(auth.Middleware(ar)).Delete("/{id}", h.DeleteStatus)
 
 	return r
 }

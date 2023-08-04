@@ -114,3 +114,15 @@ func (r *status) GetStatuses(ctx context.Context, query *object.QueryParams) ([]
 
 	return statuses, nil
 }
+
+// Delete a status
+// DeleteStatus : ステータスを削除
+func (r *status) DeleteStatus(ctx context.Context, statusId int64) error {
+	_, err := r.db.ExecContext(ctx, "DELETE FROM status WHERE id = ?", statusId)
+	if err != nil {
+		return fmt.Errorf("failed to delete status from db: %w", err)
+	}
+
+	return nil
+}
+
