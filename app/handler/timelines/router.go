@@ -2,6 +2,7 @@ package timelines
 
 import (
 	"net/http"
+
 	"yatter-backend-go/app/domain/repository"
 	"yatter-backend-go/app/handler/auth"
 
@@ -14,7 +15,7 @@ type handler struct {
 	sr repository.Status
 }
 
-// Create Handler for `/v1/timelines/public`
+// Create Handler for `/v1/timelines`
 func NewRouter(ar repository.Account, sr repository.Status) http.Handler {
 	r := chi.NewRouter()
 

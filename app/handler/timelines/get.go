@@ -9,22 +9,14 @@ import (
 	"yatter-backend-go/app/handler/auth"
 )
 
-// Handle request for `Get /v1/statuses/{id}`
+// Handle request for `Get /v1/timelines/pubic`
 func (h *handler) GetPublicTimelines(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// クエリの取得
-	queryIntParams := getQueryParams(r, "max_id", "since_id", "limit")
-	onlyMediaStr := r.URL.Query().Get("only_media")
-	onlyMedia, _ := strconv.ParseBool(onlyMediaStr)
-	queryParams := &object.QueryParams{
-		MaxId:     queryIntParams["max_id"],
-		SinceId:   queryIntParams["since_id"],
-		Limit:     queryIntParams["limit"],
-		OnlyMedia: onlyMedia,
-	}
+	// get query params
+	queryParams := getQueryParams(r)
 
-	// idからstatusを取得
+	// get public statuses
 	timelines, err := h.sr.GetPublicStatuses(ctx, queryParams)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -41,21 +33,13 @@ func (h *handler) GetPublicTimelines(w http.ResponseWriter, r *http.Request) {
 func (h *handler) GetHomeTimelines(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// アカウント情報の取得
+	// get account
 	account := auth.AccountOf(r)
 
-	// クエリの取得
-	queryIntParams := getQueryParams(r, "max_id", "since_id", "limit")
-	onlyMediaStr := r.URL.Query().Get("only_media")
-	onlyMedia, _ := strconv.ParseBool(onlyMediaStr)
-	queryParams := &object.QueryParams{
-		MaxId:     queryIntParams["max_id"],
-		SinceId:   queryIntParams["since_id"],
-		Limit:     queryIntParams["limit"],
-		OnlyMedia: onlyMedia,
-	}
+	// get query params
+	queryParams := getQueryParams(r)
 
-	// account_idが一致するstatusの配列を取得
+	// get home statuses
 	timelines, err := h.sr.GetHomeStatuses(ctx, queryParams, account.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -69,7 +53,24 @@ func (h *handler) GetHomeTimelines(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getQueryParams(r *http.Request, keys ...string) map[string]int64 {
+
+// getQueryParams returns query params as *object.QueryParams
+func getQueryParams(r *http.Request) *object.QueryParams {
+	queryIntParams := getQueryIntParams(r, "max_id", "since_id", "limit")
+	onlyMediaStr := r.URL.Query().Get("only_media")
+	onlyMedia, _ := strconv.ParseBool(onlyMediaStr)
+	queryParams := &object.QueryParams{
+		MaxId:     queryIntParams["max_id"],
+		SinceId:   queryIntParams["since_id"],
+		Limit:     queryIntParams["limit"],
+		OnlyMedia: onlyMedia,
+	}
+	return queryParams
+}
+
+
+// getQueryIntParams returns query params as map[string]int64
+func getQueryIntParams(r *http.Request, keys ...string) map[string]int64 {
 	params := make(map[string]int64)
 	for _, key := range keys {
 		value := r.URL.Query().Get(key)
@@ -80,6 +81,7 @@ func getQueryParams(r *http.Request, keys ...string) map[string]int64 {
 	return params
 }
 
+// toInt64 converts string to int64
 func toInt64(value string) (int64, error) {
 	intValue, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {
