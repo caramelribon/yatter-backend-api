@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"yatter-backend-go/app/domain/object"
+	"yatter-backend-go/app/handler/auth"
 )
 
 // Handle request for `Get /v1/statuses/{id}`
@@ -24,7 +25,38 @@ func (h *handler) GetPublicTimelines(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// idからstatusを取得
-	timelines, err := h.sr.GetStatuses(ctx, queryParams)
+	timelines, err := h.sr.GetPublicStatuses(ctx, queryParams)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(timelines); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h *handler) GetHomeTimelines(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// アカウント情報の取得
+	account := auth.AccountOf(r)
+
+	// クエリの取得
+	queryIntParams := getQueryParams(r, "max_id", "since_id", "limit")
+	onlyMediaStr := r.URL.Query().Get("only_media")
+	onlyMedia, _ := strconv.ParseBool(onlyMediaStr)
+	queryParams := &object.QueryParams{
+		MaxId:     queryIntParams["max_id"],
+		SinceId:   queryIntParams["since_id"],
+		Limit:     queryIntParams["limit"],
+		OnlyMedia: onlyMedia,
+	}
+
+	// account_idが一致するstatusの配列を取得
+	timelines, err := h.sr.GetHomeStatuses(ctx, queryParams, account.ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
