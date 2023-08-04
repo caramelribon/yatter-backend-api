@@ -13,5 +13,5 @@ type Status interface {
 	FindById(ctx context.Context, id int64) (*object.Status, error)
 
 	// Get statuses
-	GetStatuses(ctx context.Context, query *object.QueryParams) (*[]object.Status, error)
+	GetStatuses(ctx context.Context, query *object.QueryParams) ([]*object.Status, error)
 }

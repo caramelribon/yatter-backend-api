@@ -24,7 +24,6 @@ func (h *handler) GetPublicTimelines(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// idからstatusを取得
-	timelines := new([]object.Status)
 	timelines, err := h.sr.GetStatuses(ctx, queryParams)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
