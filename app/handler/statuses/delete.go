@@ -2,7 +2,6 @@ package statuses
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,23 +27,18 @@ func (h *handler) DeleteStatus(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	fmt.Println(id)
 
 	// get account
 	account := auth.AccountOf(r)
 
 	// get status from id
-	status, err := h.sr.FindById(ctx, id)
+	status, err := h.sr.FindById(ctx, id); 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if status == nil {
+	if status == nil || (status != nil && status.Account.ID != account.ID) {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		return
-	}
-	if status != nil && status.Account.ID != account.ID {
-		http.Error(w, "このstatusは削除できません", http.StatusNotFound)
 		return
 	}
 
@@ -55,7 +49,7 @@ func (h *handler) DeleteStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode("削除できました"); err != nil {
+	if err := json.NewEncoder(w).Encode("Complete delete status"); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
