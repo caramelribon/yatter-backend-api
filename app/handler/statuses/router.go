@@ -2,9 +2,9 @@ package statuses
 
 import (
 	"net/http"
+
 	"yatter-backend-go/app/domain/repository"
 	"yatter-backend-go/app/handler/auth"
-
 
 	"github.com/go-chi/chi/v5"
 )

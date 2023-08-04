@@ -11,20 +11,21 @@ import (
 func (h *handler) GetStatus(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	// get id from url
 	paramId := chi.URLParam(r, "id")
 	if paramId == "" {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
 
-	// idの型変換
+	// id conversion from string to int64
 	id, err := strconv.ParseInt(paramId, 10, 64)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// idからstatusを取得
+	// get status from id
 	status, err := h.sr.FindById(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

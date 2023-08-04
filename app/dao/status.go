@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
@@ -24,7 +25,6 @@ func NewStatus(db *sqlx.DB) repository.Status {
 }
 
 // Create a new status
-// CreateStatus : ステータスを作成
 func (r *status) CreateStatus(ctx context.Context, status *object.Status, accountId int64) error {
 	result, err := r.db.ExecContext(ctx, "INSERT INTO status (account_id, content) VALUES (?, ?)", accountId, status.Content)
 	if err != nil {
@@ -41,14 +41,23 @@ func (r *status) CreateStatus(ctx context.Context, status *object.Status, accoun
 }
 
 // Find a status by ID
-// FindById : IDからステータスを取得
 func (r *status) FindById(ctx context.Context, id int64) (*object.Status, error) {
 	entity := new(object.Status)
+
+	// create query
 	query := `
-		SELECT s.id, s.content, s.create_at, a.id AS "account.id", a.username AS "account.username", a.create_at AS "account.create_at"
+		SELECT
+		  s.id,
+			s.content,
+			s.create_at,
+			a.id AS "account.id",
+			a.username AS "account.username",
+			a.create_at AS "account.create_at"
 		FROM status s
 		JOIN account a ON s.account_id = a.id
 		WHERE s.id = ?`
+
+	// execute query
 	err := r.db.QueryRowxContext(ctx, query, id).StructScan(entity)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -66,7 +75,7 @@ func (r *status) GetPublicStatuses(ctx context.Context, query *object.QueryParam
 	var statuses []*object.Status
 	var args []interface{}
 
-	// クエリの生成
+	// create query
 	q := `
 		SELECT
 		  s.id,
@@ -79,7 +88,7 @@ func (r *status) GetPublicStatuses(ctx context.Context, query *object.QueryParam
 		LEFT JOIN account a ON s.account_id = a.id
 		`
 	if query.OnlyMedia {
-		// 空のスライスを返す
+		// return empty slice
 		return statuses, nil
 	} else {
 		if query.SinceId != 0 && query.MaxId != 0 {
@@ -101,7 +110,7 @@ func (r *status) GetPublicStatuses(ctx context.Context, query *object.QueryParam
 		}
 	}
 
-	// クエリの実行
+	// execute query
 	err := r.db.SelectContext(ctx, &statuses, q, args...)
 
 	if err != nil {
@@ -119,7 +128,7 @@ func (r *status) GetHomeStatuses(ctx context.Context, query *object.QueryParams,
 	var statuses []*object.Status
 	var args []interface{}
 
-	// クエリの生成
+	// create query
 	q := `
 		SELECT
 		  s.id,
@@ -136,7 +145,7 @@ func (r *status) GetHomeStatuses(ctx context.Context, query *object.QueryParams,
 	args = append(args, accountId)
 
 	if query.OnlyMedia {
-		// 空のスライスを返す
+		// return empty slice
 		return statuses, nil
 	} else {
 		if query.SinceId != 0 && query.MaxId != 0 {
@@ -158,7 +167,7 @@ func (r *status) GetHomeStatuses(ctx context.Context, query *object.QueryParams,
 		}
 	}
 
-	// クエリの実行
+	// execute query
 	err := r.db.SelectContext(ctx, &statuses, q, args...)
 
 	if err != nil {
@@ -172,7 +181,6 @@ func (r *status) GetHomeStatuses(ctx context.Context, query *object.QueryParams,
 }
 
 // Delete a status
-// DeleteStatus : ステータスを削除
 func (r *status) DeleteStatus(ctx context.Context, statusId int64) error {
 	_, err := r.db.ExecContext(ctx, "DELETE FROM status WHERE id = ?", statusId)
 	if err != nil {

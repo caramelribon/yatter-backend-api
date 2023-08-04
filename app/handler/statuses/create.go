@@ -17,20 +17,22 @@ type AddRequest struct {
 func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	//ctx := r.Context()
 
+	// get request body
 	var req AddRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	// create status object
 	status := new(object.Status)
 	status.Content = req.Status
 
-	// アカウント情報の取得
+	// get account
 	account := auth.AccountOf(r)
 	status.Account = account
 
-	// ステータスの作成
+	// create status
 	if err := h.sr.CreateStatus(r.Context(), status, account.ID); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
